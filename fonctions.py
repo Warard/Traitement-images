@@ -25,6 +25,24 @@ def ouvrir_fichier(image_source, octets_to_read=0):
     source.close()
     return data
 
+def val_dec(n_octets):
+    '''
+    Convertit un code ASCII en valeur décimale. 
+    Ajouter b devant l'argument str n_octets
+    arg : 
+        b'str' n_octets : Code ASCII à convertir 
+    return : 
+        int result : code ASCII converti en valeur décimale
+    '''
+    result = 0
+    for i in range(len(n_octets)):
+        if i == 0:
+            result += n_octets[i]
+        else:
+            result += n_octets[i] * 256**i
+
+    return result
+
 
 def info_image(image=image_source): 
     '''

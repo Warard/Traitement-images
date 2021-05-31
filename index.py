@@ -1,5 +1,7 @@
 # from fonctions import dupliquer_image, valeurs_pixels
 
+
+#----- CHOIX DES FICHIERS DE TRAVAIL -----#
 image_source = 'vinci.bmp'
 image_finale = 'vinci_modifiee.bmp'
 
@@ -7,6 +9,8 @@ image_finale = 'vinci_modifiee.bmp'
 # image_finale = 'joconde_modifiee.bmp'
 
 
+
+#----- CONVERSION ASCII --> DECIMALE -----#
 def val_dec(n_octets):
     '''
     Convertit un code ASCII en valeur décimale. 
@@ -26,16 +30,17 @@ def val_dec(n_octets):
     return result
 
 
+
+#----- OUVERTURE FICHIER -----#
 def ouvrir_fichier(image_source, octets_to_read=0):
     '''
-    Si methode = rb (par défaut) ouverture en lecture binaire de image_source
-    Si methode = wb ouverture en écriture binaire de image_source
-    arg :
-        str image_source : Nom du fichier et son extension
-        int octets_to_read : Nombre total d'octets à lire. Si = 0, tout est lu
-        str methode : ouverture en lecture : rb ; en écriture : wb
+    Ouvre un fichier, et retourne son contenu en type byte
+    Penser à le convertir en bytearray pour modifier son contenu via bytearray()
+    args :
+        str image_source : Nom du fichier source et son extension
+        int octets_to_read : Nombre total d'octets à lire. Si = 0 (par défaut), tout est lu
     return : 
-        byte data : données du fichier image_source
+        byte data : données contenu dans le fichier image_source
     '''
     source = open(image_source, 'rb')
     
@@ -50,10 +55,12 @@ def ouvrir_fichier(image_source, octets_to_read=0):
     return data
 
 
+
+#----- CONTENU HEADER IMAGE -----#
 def info_image(image=image_source): 
     '''
     Affiche les infos suivantes sur l'image donnée en argument : 
-    signature, taille, champ reservé, offset, largeur et hauteur
+        signature, taille, champ reservé, offset, largeur et hauteur
     arg : 
         str image : nom et extension du fichier image source
     return : 
@@ -63,42 +70,65 @@ def info_image(image=image_source):
     print('------', image, '------')
    
     print("Signature : ", infos[0:2])
-    print("Taille du fichier: ", val_dec(infos[2:6]), "octets (", infos[2:6], ")")
-    print("Champ réservé :", val_dec(infos[6:10]), " (", infos[6:10], ")")
-    print("Offset de l'image :", val_dec(infos[10:14]), " (", infos[10:14], ")")
-    print("Largeur de l'image :", val_dec(infos[18:22]), "px (", infos[18:22], ")")
-    print("Hauteur de l'image :", val_dec(infos[22:26]), "px (", infos[22:26], ")")
+    print("Taille du fichier: ", val_dec(infos[2:6]), "octets")
+    print("Champ réservé :", val_dec(infos[6:10]))
+    print("Offset de l'image :", val_dec(infos[10:14]))
+    print("Largeur de l'image :", val_dec(infos[18:22]), "px")
+    print("Hauteur de l'image :", val_dec(infos[22:26]), "px")
 
-    print("Codage de la couleur:", val_dec(infos[28:30]), "couleur(s) (", infos[28:30], ")")
+    print("Codage de la couleur:", val_dec(infos[28:30]), "couleur(s)")
 
-info_image(image_source) 
 
-# valeurs_pixels(image_source = image_source, valeur_a_afficher=[0, 0])
 
+#----- CONVERSION IMAGE EN ROUGE -----#
 def vers_rouge(image_source = image_source, image_finale = image_finale):
     '''
-    Convertit une image colorée en une image contant unique la composant rouge 
+    Convertit une image colorée en une image contant uniquement sa composante rouge.
+    Le résultat est stockée dans image_finale 
     args :
         str image_source : nom et extension de l'image initiale 
-        str image_finale : nom et extension de l'image initiale. cette valeur sera le nom du fichier image
+        str image_finale : nom et extension de l'image finale. cette valeur sera le nom du fichier image
     return : 
         void
     '''
     datas = ouvrir_fichier(image_source)
     
     offset = val_dec(datas[10:14])
-    datas = bytearray(datas) #conversion de type pour travailler avec un type de données modifiable
+    datas = bytearray(datas) 
 
     for i in range(offset, len(datas), 3):
         datas[i] = 0
         datas[i+1] = 0
     
-    print(i+(3*offset))
-    destination=open(image_finale, 'wb')
-    destination.write(datas)
-    destination.close()
+    fichier_final = open(image_finale, 'wb')
+    fichier_final.write(datas)
+    fichier_final.close()
+
+vers_rouge()
 
 
-vers_rouge(image_source)
-info_image(image_finale)
 
+#----- INVERSION D'IMAGE -----#
+def inversion_image(image_source = image_source, image_finale = 'inversion.bmp'):
+    '''
+    Inverse les couleurs d'une image 
+    Le résultat est stockée dans image_finale 
+    args :
+        str image_source : nom et extension de l'image initiale 
+        str image_finale : nom et extension de l'image finale. cette valeur sera le nom du fichier image
+    return : 
+        void
+    '''
+    datas = ouvrir_fichier(image_source)
+    
+    offset = val_dec(datas[10:14])
+    datas = bytearray(datas) 
+
+    for i in range(offset, len(datas)):
+        datas[i] = 255 - datas[i] 
+
+    fichier_final = open(image_finale, 'wb')
+    fichier_final.write(datas)
+    fichier_final.close()
+
+inversion_image()
