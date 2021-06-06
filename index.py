@@ -1,12 +1,13 @@
 # from fonctions import dupliquer_image, valeurs_pixels
 
 
-#----- CHOIX DES FICHIERS DE TRAVAIL -----#
-image_source = 'vinci.bmp'
-image_finale = 'vinci_modifiee.bmp'
 
-# image_source = 'joconde.bmp'
-# image_finale = 'joconde_modifiee.bmp'
+#----- CHOIX DES FICHIERS DE TRAVAIL -----#
+image_source = 'assets/source/vinci.bmp'
+image_finale = 'assets/source/vinci_modifiee.bmp'
+
+# image_source = 'assets/source/joconde.bmp'
+# image_finale = 'assets/source/joconde_modifiee.bmp'
 
 
 
@@ -81,7 +82,7 @@ def info_image(image=image_source):
 
 
 #----- CONVERSION IMAGE EN ROUGE -----#
-def vers_rouge(image_source = image_source, image_finale = image_finale):
+def vers_rouge(image_source = image_source, image_finale = 'assets/result/rouge.bmp'):
     '''
     Convertit une image colorée en une image contant uniquement sa composante rouge.
     Le résultat est stockée dans image_finale 
@@ -104,12 +105,12 @@ def vers_rouge(image_source = image_source, image_finale = image_finale):
     fichier_final.write(datas)
     fichier_final.close()
 
-vers_rouge()
+# vers_rouge()
 
 
 
 #----- INVERSION D'IMAGE -----#
-def inversion_image(image_source = image_source, image_finale = 'inversion.bmp'):
+def inversion_image(image_source = image_source, image_finale = 'assets/result/inversion.bmp'):
     '''
     Inverse les couleurs d'une image 
     Le résultat est stockée dans image_finale 
@@ -131,4 +132,135 @@ def inversion_image(image_source = image_source, image_finale = 'inversion.bmp')
     fichier_final.write(datas)
     fichier_final.close()
 
-inversion_image()
+# inversion_image()
+
+
+
+#----- NOIR ET BLANC -----#
+def noir_et_blanc(image_source = image_source, image_finale = 'assets/result/NeB.bmp'):
+    '''
+    Transforme une image colorée en une image en noir et blanc 
+    Le résultat est stockée dans image_finale 
+    args :
+        str image_source : nom et extension de l'image initiale 
+        str image_finale : nom et extension de l'image finale. cette valeur sera le nom du fichier image
+    return : 
+        void
+    '''
+    datas = ouvrir_fichier(image_source)
+    datas = bytearray(datas)
+
+    offset = val_dec(datas[10:14])
+    
+    for i in range(offset, len(datas)):
+        r = val_dec(datas[i+2:i+3])
+        v = val_dec(datas[i+1:i+2])
+        b = val_dec(datas[i:i+1])
+
+        m = (r+v+b) // 3
+
+        datas[i] = m 
+
+    fichier_final = open(image_finale, 'wb')
+    fichier_final.write(datas)
+    fichier_final.close()
+
+# noir_et_blanc() 
+
+
+
+#----- MONOCHROME -----#
+def monochrome(seuil, niveau1, niveau2, image_source = 'assets/result/NeB.bmp', image_finale = 'assets/result/monochrome.bmp'):
+    '''
+    Transforme une image en noir et blanc 3 couleurs, en une image monochrome 
+    Le résultat est stockée dans image_finale 
+    args :
+        str image_source : nom et extension de l'image initiale (doit-être en noir et blanc)
+        str image_finale : nom et extension de l'image finale. cette valeur sera le nom du fichier image
+    return : 
+        void
+    '''
+    datas = ouvrir_fichier(image_source)
+    datas = bytearray(datas)
+
+    offset = val_dec(datas[10:14])
+    
+    for i in range(offset, len(datas)):
+        r = val_dec(datas[i+2:i+3])
+        v = val_dec(datas[i+1:i+2])
+        b = val_dec(datas[i:i+1])
+
+        if r < seuil:
+            r = niveau1
+        else:
+            r = niveau2
+        datas[i] = r
+
+        if v < seuil:
+            v = niveau1
+        else:
+            v = niveau2
+        datas[i] = v
+
+        if b < seuil:
+            b = niveau1
+        else:
+            b = niveau2
+        datas[i] = b
+
+
+    fichier_final = open(image_finale, 'wb')
+    fichier_final.write(datas)
+    fichier_final.close()
+
+# monochrome(seuil = 90, niveau1 = 50, niveau2 = 180)
+
+
+
+#----- NOIR ET BLANC -----#
+def rotation_180(image_source = image_source, image_finale = 'assets/result/180.bmp'):
+    '''
+    Fais une rotation de 180 degrés de l'image source, et stocke le résultat dans image finale
+    args :
+        str image_source : nom et extension de l'image initiale 
+        str image_finale : nom et extension de l'image finale. cette valeur sera le nom du fichier image
+    return : 
+        void
+    '''
+    datas = ouvrir_fichier(image_source)
+
+    hauteur = val_dec(datas[22:26])
+    largeur = val_dec(datas[18:22])
+    offset = val_dec(datas[10:14])
+    
+    # Données de l'image finale ; ici, ajout du header provenant de l'image source 
+    datas_dest = datas[0:offset]
+    datas_dest = bytearray(datas_dest)
+    
+    # On réouvre le fichier source pour lire ses lignes
+    src = open(image_source, 'rb')
+
+    # Initialisation de la variable qui contiendra les copies des lignes
+    ligne = []
+
+    for i in range(hauteur):
+        # Parcours les lignes unes à une en partant de la fin et les stocke
+        src.seek(offset + ((hauteur - i)*largeur)*3)
+        ligne = src.read(largeur*3)
+
+        # Ecris la ligne stockée précédemment dans la nouvelle image
+            # for px in reversed(ligne):
+            #     datas_dest.append(px)
+        for k in range(len(ligne)):
+            datas_dest.append(ligne[k])
+
+
+    fichier_final = open(image_finale, 'wb')
+    fichier_final.write(datas_dest)
+    fichier_final.close()
+
+rotation_180() 
+
+
+
+#  Faire la rotation à 90 degrés
