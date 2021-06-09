@@ -1,10 +1,6 @@
-# from fonctions import dupliquer_image, valeurs_pixels
-
-
-
-#----- CHOIX DES FICHIERS DE TRAVAIL -----#
-image_source = 'assets/source/vinci.bmp'
-image_finale = 'assets/source/vinci_modifiee.bmp'
+# #----- CHOIX DES FICHIERS DE TRAVAIL -----#
+# image_source = 'assets/source/vinci.bmp'
+# image_finale = 'assets/source/vinci_modifiee.bmp'
 
 # image_source = 'assets/source/joconde.bmp'
 # image_finale = 'assets/source/joconde_modifiee.bmp'
@@ -58,7 +54,7 @@ def ouvrir_fichier(image_source, octets_to_read=0):
 
 
 #----- CONTENU HEADER IMAGE -----#
-def info_image(image=image_source): 
+def info_image(image_source): 
     '''
     Affiche les infos suivantes sur l'image donnée en argument : 
         signature, taille, champ reservé, offset, largeur et hauteur
@@ -67,8 +63,8 @@ def info_image(image=image_source):
     return : 
         void
     ''' 
-    infos = ouvrir_fichier(image, octets_to_read=30)
-    print('------', image, '------')
+    infos = ouvrir_fichier(image_source, octets_to_read=30)
+    print('------', image_source, '------')
    
     print("Signature : ", infos[0:2])
     print("Taille du fichier: ", val_dec(infos[2:6]), "octets")
@@ -82,7 +78,7 @@ def info_image(image=image_source):
 
 
 #----- CONVERSION IMAGE EN ROUGE -----#
-def vers_rouge(image_source = image_source, image_finale = 'assets/result/rouge.bmp'):
+def fonction_vers_rouge(image_source, image_finale):
     '''
     Convertit une image colorée en une image contant uniquement sa composante rouge.
     Le résultat est stockée dans image_finale 
@@ -110,7 +106,7 @@ def vers_rouge(image_source = image_source, image_finale = 'assets/result/rouge.
 
 
 #----- INVERSION D'IMAGE -----#
-def inversion_image(image_source = image_source, image_finale = 'assets/result/inversion.bmp'):
+def fonction_inversion_image(image_source, image_finale):
     '''
     Inverse les couleurs d'une image 
     Le résultat est stockée dans image_finale 
@@ -137,7 +133,7 @@ def inversion_image(image_source = image_source, image_finale = 'assets/result/i
 
 
 #----- NOIR ET BLANC -----#
-def noir_et_blanc(image_source = image_source, image_finale = 'assets/result/NeB.bmp'):
+def fonction_noir_et_blanc(image_source, image_finale):
     '''
     Transforme une image colorée en une image en noir et blanc 
     Le résultat est stockée dans image_finale 
@@ -170,7 +166,7 @@ def noir_et_blanc(image_source = image_source, image_finale = 'assets/result/NeB
 
 
 #----- MONOCHROME -----#
-def monochrome(seuil, niveau1, niveau2, image_source = 'assets/result/NeB.bmp', image_finale = 'assets/result/monochrome.bmp'):
+def fonction_monochrome(seuil, niveau1, niveau2, image_source, image_finale):
     '''
     Transforme une image en noir et blanc 3 couleurs, en une image monochrome 
     Le résultat est stockée dans image_finale 
@@ -218,7 +214,7 @@ def monochrome(seuil, niveau1, niveau2, image_source = 'assets/result/NeB.bmp', 
 
 
 #----- ROTATION 180 -----#
-def rotation_180(image_source = image_source, image_finale = 'assets/result/180.bmp'):
+def fonction_rotation_180_degres(image_source, image_finale):
     '''
     Fais une rotation de 180 degrés de l'image source, et stocke le résultat dans image finale
     args :
@@ -263,7 +259,7 @@ def rotation_180(image_source = image_source, image_finale = 'assets/result/180.
 
 
 #----- ROTATION MIROIR -----#
-def miroir(image_source = image_source, image_finale = 'assets/result/miroir.bmp'):
+def fonction_miroir(image_source, image_finale):
     '''
     Fais un effet miroir sur l'image source et stocke le résultat dans l'image finale
     args :
@@ -300,8 +296,41 @@ def miroir(image_source = image_source, image_finale = 'assets/result/miroir.bmp
             datas_dest.append(ligne[::-1][k+1])  #vert
             datas_dest.append(ligne[::-1][k])    #rouge  
 
-    print(len(datas_dest))
     fichier_final = open(image_finale, 'wb')
     fichier_final.write(datas_dest)
     fichier_final.close()
 
+
+
+#----- AFFICHAGE GRAPHIQUE -----#
+# Choix du nom des fichiers
+image_source = input('Entrer le nom et l\'extension du fichier image source > ')
+image_finale = input('Entrer le nom et l\'extension de l\'image finale > ')
+print('Entrer le numéro du traitement à appliquer sur', image_source, 'parmis la liste suivante')
+
+# Affichage des fonctions de traitement disponibles
+print('-------------- Fonctions disponibles : --------------')
+i = 1
+for fonction in dir(): 
+    if fonction[0] == 'f': 
+        print('N°', i, ':', fonction)
+        i += 1
+print('-------------- ----------------------- --------------')
+
+# Choix de la fonction de traitement
+choix = int(input('\n Appliquer la fonction N° > '))
+if choix == 1:
+    fonction_inversion_image(image_source, image_finale)
+elif choix == 2:
+    fonction_miroir(image_source, image_finale)
+elif choix == 3:
+    seuil = int(input('Valeur du seuil [0-255] > '))
+    niveau1 = int(input('Valeur du niveau 1 [0-255] > '))
+    niveau2 = int(input('Valeur du niveau 2 [0-255] > '))
+    fonction_monochrome(image_source = image_source, image_finale=image_finale, seuil=seuil, niveau1=niveau1, niveau2=niveau2)
+elif choix == 4:
+    fonction_noir_et_blanc(image_source, image_finale)
+elif choix == 5:
+    fonction_rotation_180_degres(image_source, image_finale)
+elif choix == 6:
+    fonction_vers_rouge(image_source, image_finale)
