@@ -217,7 +217,7 @@ def monochrome(seuil, niveau1, niveau2, image_source = 'assets/result/NeB.bmp', 
 
 
 
-#----- NOIR ET BLANC -----#
+#----- ROTATION 180 -----#
 def rotation_180(image_source = image_source, image_finale = 'assets/result/180.bmp'):
     '''
     Fais une rotation de 180 degrés de l'image source, et stocke le résultat dans image finale
@@ -234,33 +234,74 @@ def rotation_180(image_source = image_source, image_finale = 'assets/result/180.
     offset = val_dec(datas[10:14])
     
     # Données de l'image finale ; ici, ajout du header provenant de l'image source 
-    datas_dest = datas[0:offset]
-    datas_dest = bytearray(datas_dest)
+    datas_dest = bytearray(datas[0:offset])
     
-    # On réouvre le fichier source pour lire ses lignes
+    # On réouvre le fichier source de manière à utiliser .seek pour lire ses lignes
     src = open(image_source, 'rb')
 
     # Initialisation de la variable qui contiendra les copies des lignes
     ligne = []
 
-    for i in range(hauteur):
-        # Parcours les lignes unes à une en partant de la fin et les stocke
+
+    for i in range(1, hauteur+1):
+        # Parcours les lignes unes à une en partant de la fin et les stocke (partir de la fin permet de faire la rotation)
         src.seek(offset + ((hauteur - i)*largeur)*3)
         ligne = src.read(largeur*3)
 
-        # Ecris la ligne stockée précédemment dans la nouvelle image
-            # for px in reversed(ligne):
-            #     datas_dest.append(px)
+        # Ecris les lignes unes à unes
         for k in range(len(ligne)):
             datas_dest.append(ligne[k])
 
+        
 
     fichier_final = open(image_finale, 'wb')
     fichier_final.write(datas_dest)
     fichier_final.close()
 
-rotation_180() 
+# rotation_180() 
 
 
 
-#  Faire la rotation à 90 degrés
+#----- ROTATION MIROIR -----#
+def miroir(image_source = image_source, image_finale = 'assets/result/miroir.bmp'):
+    '''
+    Fais un effet miroir sur l'image source et stocke le résultat dans l'image finale
+    args :
+        str image_source : nom et extension de l'image initiale 
+        str image_finale : nom et extension de l'image finale. cette valeur sera le nom du fichier image
+    return : 
+        void
+    '''
+    datas = ouvrir_fichier(image_source)
+
+    hauteur = val_dec(datas[22:26])
+    largeur = val_dec(datas[18:22])
+    offset = val_dec(datas[10:14])
+    
+    # Données de l'image finale ; ici, ajout du header provenant de l'image source 
+    datas_dest = bytearray(datas[0:offset])
+    
+    # On réouvre le fichier source de manière à utiliser .seek pour lire ses lignes
+    src = open(image_source, 'rb')
+
+    # Initialisation de la variable qui contiendra les copies des lignes
+    ligne = bytearray()
+
+    # Parcours toute la hauteur de l'image
+    for i in range(hauteur):
+        # Parcours les lignes unes à une en partant de la fin et les stocke (partir de la fin permet de faire la rotation)
+        src.seek(offset+(i*largeur*3))
+        ligne = src.read(largeur*3)
+
+        # Ecris les lignes unes à unes, en partant de la fin via le sclicing
+        for k in range(0, len(ligne), 3):
+            # print(k)
+            datas_dest.append(ligne[::-1][k+2])  #bleu
+            datas_dest.append(ligne[::-1][k+1])  #vert
+            datas_dest.append(ligne[::-1][k])    #rouge  
+
+    print(len(datas_dest))
+    fichier_final = open(image_finale, 'wb')
+    fichier_final.write(datas_dest)
+    fichier_final.close()
+
